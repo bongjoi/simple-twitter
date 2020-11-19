@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import UploadForm from './UploadForm';
+import { AuthContext } from '../context/authContext';
 
 const TweetFactory = () => {
+  const { currentUser } = useContext(AuthContext);
+
   return (
     <div className="tweet-factory-block">
-      <p>제작중...</p>
+      <UploadForm currentUser={currentUser} />
     </div>
   );
 };
