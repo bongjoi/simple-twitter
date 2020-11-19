@@ -3,8 +3,12 @@ import { AuthContext } from '../context/authContext';
 
 const Home = () => {
   const { currentUser } = useContext(AuthContext);
-  console.log(currentUser);
-  return <div>Home Page</div>;
+  return (
+    <div>
+      <p>{currentUser.email}</p>
+      <p>{currentUser.displayName}</p>
+    </div>
+  );
 };
 
 export default Home;

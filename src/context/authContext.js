@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from 'react';
-import app from '../firebase/config';
+import { projectAuth } from '../firebase/config';
 import Loader from '../components/Loader';
 
 const AuthContext = createContext();
@@ -9,11 +9,9 @@ const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    app.auth().onAuthStateChanged((user) => {
+    projectAuth.onAuthStateChanged((user) => {
       setCurrentUser(user);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+      setIsLoading(false);
     });
   }, []);
 
