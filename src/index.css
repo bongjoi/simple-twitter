@@ -187,3 +187,51 @@ button:focus {
   color: red;
   text-align: center;
 }
+
+/* Home */
+.home-block {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+.home-inner {
+  margin: auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 360px;
+  height: 100%;
+}
+
+/* Navigation */
+.navigation-block {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navigation-block a,
+.navigation-block button {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 4rem;
+  color: var(--primary-color);
+  background-color: transparent;
+}
+.navigation-block span {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: white;
+}
+
+/* TweetFactory */
+.tweet-factory-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}

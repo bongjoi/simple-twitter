@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import AuthForm from './AuthForm';
 import { firebaseInstance, projectAuth } from '../firebase/config';
 import useInput from '../hooks/useInput';
@@ -10,17 +10,20 @@ const LoginForm = () => {
   });
   const [error, setError] = useState('');
 
-  const onSubmitEmail = (email, password) => async (e) => {
-    e.preventDefault();
-    try {
-      await projectAuth.signInWithEmailAndPassword(email, password);
-    } catch (error) {
-      console.error(error);
-      setError('로그인 실패');
-    }
-  };
+  const onSubmitEmail = useCallback(
+    (email, password) => async (e) => {
+      e.preventDefault();
+      try {
+        await projectAuth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        console.error(error);
+        setError('로그인 실패');
+      }
+    },
+    [],
+  );
 
-  const onSubmitGoogle = async (e) => {
+  const onSubmitGoogle = useCallback(async (e) => {
     e.preventDefault();
     try {
       const provider = new firebaseInstance.auth.GoogleAuthProvider();
@@ -29,7 +32,7 @@ const LoginForm = () => {
       console.error(error);
       setError('로그인 실패');
     }
-  };
+  }, []);
 
   return (
     <AuthForm

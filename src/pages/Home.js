@@ -1,12 +1,14 @@
-import React, { useContext } from 'react';
-import { AuthContext } from '../context/authContext';
+import React from 'react';
+import Navigation from '../components/Navigation';
+import TweetFactory from '../components/TweetFactory';
 
 const Home = () => {
-  const { currentUser } = useContext(AuthContext);
   return (
-    <div>
-      <p>{currentUser.email}</p>
-      <p>{currentUser.displayName}</p>
+    <div className="home-block">
+      <div className="home-inner">
+        <Navigation />
+        <TweetFactory />
+      </div>
     </div>
   );
 };
