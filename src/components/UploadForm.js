@@ -1,59 +1,35 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faAngleRight,
   faTimes,
   faPlus,
 } from '@fortawesome/free-solid-svg-icons';
-import {
-  projectFirestore,
-  projectStorage,
-  timestamp,
-} from '../firebase/config';
-import ProgressBar from './ProgressBar';
+import { projectFirestore, projectStorage } from '../firebase/config';
 
 const UploadForm = ({ currentUser }) => {
   const [text, setText] = useState('');
   const [imageFile, setImageFile] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [isShowProgress, setIsShowProgress] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (imageFile !== null) {
-      setIsShowProgress(true);
-      const imageRef = projectStorage
-        .ref()
-        .child(`${currentUser.uid}/${imageFile.name}`);
+  function processFile(file) {
+    const reader = new FileReader();
 
-      imageRef.put(imageFile).on(
-        'state_changed',
-        (snap) => {
-          let percentage = (snap.bytesTransferred / snap.totalBytes) * 100;
-          setProgress(percentage);
-        },
-        (error) => {
-          setError(error);
-        },
-        async () => {
-          const url = await imageRef.getDownloadURL();
-          setImageUrl(url);
-        },
-      );
-    }
-  }, [currentUser.uid, imageFile]);
+    reader.readAsDataURL(file);
+
+    reader.onerror = () => setError('오류 발생');
+    reader.onloadend = (e) => {
+      const { result } = e.target;
+      setImageDataUrl(result);
+    };
+  }
 
   const onChangeFile = useCallback((e) => {
-    const types = ['image/png', 'image/jpeg'];
-    let selected = e.target.files[0];
-
-    if (selected && types.includes(selected.type)) {
-      setImageFile(selected);
-      setError('');
-    } else {
-      setImageFile(null);
-      setError('png 또는 jpg 이미지 파일만 지원합니다.');
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      processFile(file);
     }
   }, []);
 
@@ -66,11 +42,21 @@ const UploadForm = ({ currentUser }) => {
       e.preventDefault();
       if (text === '') return;
 
+      let imageUrl = '';
+      if (imageDataUrl) {
+        const imageRef = projectStorage
+          .ref()
+          .child(`${currentUser.uid}/${Date.now()}_${imageFile.name}`);
+        const result = await imageRef.putString(imageDataUrl, 'data_url');
+        imageUrl = await result.ref.getDownloadURL();
+      }
+
       try {
         const tweetObj = {
           text,
-          createdAt: timestamp(),
+          createdAt: Date.now(),
           creatorId: currentUser.uid,
+          creatorName: currentUser.displayName,
           imageUrl,
         };
         await projectFirestore.collection('tweets').add(tweetObj);
@@ -80,17 +66,16 @@ const UploadForm = ({ currentUser }) => {
       }
       setText('');
       setImageFile(null);
-      setImageUrl('');
+      setImageDataUrl('');
       setError('');
     },
-    [text, currentUser.uid, imageUrl],
+    [text, imageFile, imageDataUrl, currentUser.uid, currentUser.displayName],
   );
 
   const onRemoveImage = useCallback(async () => {
     setImageFile(null);
-    setImageUrl('');
-    await projectStorage.refFromURL(imageUrl).delete();
-  }, [imageUrl]);
+    setImageDataUrl('');
+  }, []);
 
   return (
     <div className="upload-form-block">
@@ -116,24 +101,15 @@ const UploadForm = ({ currentUser }) => {
               <p>사진 추가하기</p>
             </>
           )}
-          {imageFile && (
+          {imageFile && imageDataUrl && (
             <div className="output">
               <span className="file-name">{imageFile.name}</span>
-              {imageUrl && (
-                <div className="image-preview">
-                  <img src={imageUrl} alt={imageFile.name} />
-                  <div className="remove-preview" onClick={onRemoveImage}>
-                    <FontAwesomeIcon icon={faTimes} />
-                  </div>
+              <div className="image-preview">
+                <img src={imageDataUrl} alt={imageFile.name} />
+                <div className="remove-preview" onClick={onRemoveImage}>
+                  <FontAwesomeIcon icon={faTimes} />
                 </div>
-              )}
-              {isShowProgress && (
-                <ProgressBar
-                  progress={progress}
-                  setIsShowProgress={setIsShowProgress}
-                  imageUrl={imageUrl}
-                />
-              )}
+              </div>
             </div>
           )}
           {error && <div className="error">{error}</div>}

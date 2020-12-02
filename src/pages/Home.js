@@ -1,6 +1,7 @@
 import React from 'react';
 import Navigation from '../components/Navigation';
 import TweetFactory from '../components/TweetFactory';
+import TweetList from '../components/TweetList';
 
 const Home = () => {
   return (
@@ -8,6 +9,7 @@ const Home = () => {
       <div className="home-inner">
         <Navigation />
         <TweetFactory />
+        <TweetList />
       </div>
     </div>
   );
